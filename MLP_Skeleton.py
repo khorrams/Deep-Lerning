@@ -11,8 +11,10 @@ from __future__ import print_function
 import cPickle
 import numpy as np
 
+# epsilon
+eps = 10e-8
 
-# This is a class for a LinearTransform layer which takes an input 
+# This is a class for a LinearTransform layer which takes an input
 # weight matrix W and computes W x as the forward step
 class LinearTransform(object):
 
@@ -49,7 +51,6 @@ class LinearTransform(object):
 
         return dx, dw, db
 
-
 # This is a class for a ReLU layer max(x,0)
 class ReLU(object):
     def __init__(self):
@@ -76,15 +77,13 @@ class ReLU(object):
 
         return dx
 
-
-# This is a class for a sigmoid layer followed by a cross entropy layer, the reason 
+# This is a class for a sigmoid layer followed by a cross entropy layer, the reason
 # this is put into a single layer is because it has a simple gradient form
 class SigmoidCrossEntropy(object):
 
     def __init__(self):
         self.y = None
         self.sigx = None
-        self.loss = None
 
     def _forward(self, x):
         """
@@ -122,7 +121,7 @@ class SigmoidCrossEntropy(object):
 # This is a class for one hidden layer neural network
 class NN(object):
 
-    def __init__(self, input_dims, hidden_units, output_units):
+    def __init__(self, input_dims, hidden_units=512, output_units=1):
         """
         Initializes the network.
         :param input_dims: The dimension of the input.
@@ -204,9 +203,9 @@ class NN(object):
             x_val,
             y_val,
             num_epochs=10,
-            batch_size=512,
+            batch_size=128,
             learning_rate=0.001,
-            momentum=0.9,
+            momentum=0.8,
             l2_lambda=0.0):
         """
         Trains the model using gradient descent.
@@ -306,8 +305,8 @@ class NN(object):
         :param dim_out: The output dimension of the affine layer.
         :return: The randomly initialized weight and bias.
         """
-        w = 10e-4 * np.random.uniform(-1.0, 1.0, size=(dim_in, dim_out))
-        b = 10e-4 * np.random.uniform(-1.0, 1.0, size=(1, dim_out))
+        w = 10e-5 * np.random.uniform(-1.0, 1.0, size=(dim_in, dim_out))
+        b = 10e-5 * np.random.uniform(-1.0, 1.0, size=(1, dim_out))
 
         return w, b
 
@@ -378,9 +377,6 @@ def preprocess_data(data_path):
 
 
 if __name__ == '__main__':
-    # epsilon
-    eps = 10e-8
-
     # path to data
     data_path = 'cifar-2class-py2/cifar_2class_py2.p'
 
@@ -388,7 +384,7 @@ if __name__ == '__main__':
     x_train, y_train, x_test, y_test, data_dimension = preprocess_data(data_path)
 
     # build the model
-    nn = NN(input_dims=data_dimension, hidden_units=64, output_units=1)
+    nn = NN(input_dims=data_dimension, hidden_units=512, output_units=1)
 
     # train the model
     train_loss, train_Acc, val_loss, val_acc = nn.train(
@@ -396,16 +392,16 @@ if __name__ == '__main__':
                                                         y_train=y_train,
                                                         x_val=x_test,
                                                         y_val=y_test,
-                                                        num_epochs=25,
-                                                        batch_size=512,
-                                                        learning_rate=0.0001,
-                                                        momentum=0,
-                                                        l2_lambda=0.01
+                                                        num_epochs=10,
+                                                        batch_size=128,
+                                                        learning_rate=0.001,
+                                                        momentum=0.8,
+                                                        l2_lambda=0.0
                                                         )
 
     # evaluate the trained model
     test_loss, test_acc = nn.evaluate(x_test, y_test)
-
+    print("\nTest.Loss = {}          Test.Accuracy = {}".format(test_loss, test_acc))
 
 
 
